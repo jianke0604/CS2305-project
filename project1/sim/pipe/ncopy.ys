@@ -26,13 +26,16 @@ ncopy:	pushl %ebp		# Save old frame pointer
 	andl %edx,%edx		# len <= 0?
 	jle Done		# if so, goto Done:
 
-Loop:	mrmovl (%ebx), %esi	# read val from src...
+Loop:	
+	mrmovl (%ebx), %esi	# read val from src...
 	rmmovl %esi, (%ecx)	# ...and store it to dst
 	andl %esi, %esi		# val <= 0?
 	jle Npos		# if so, goto Npos:
 	irmovl $1, %edi
 	addl %edi, %eax		# count++
-Npos:	irmovl $1, %edi
+
+Npos:	
+	irmovl $1, %edi
 	subl %edi, %edx		# len--
 	irmovl $4, %edi
 	addl %edi, %ebx		# src++

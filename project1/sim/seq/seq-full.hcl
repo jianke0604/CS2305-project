@@ -42,7 +42,7 @@ intsig IPUSHL	'I_PUSHL'
 intsig IPOPL	'I_POPL'
 # Instruction code for iaddl instruction
 intsig IIADDL	'I_IADDL'
-// inssig ILEAVE	'I_LEAVE'
+intsig ILEAVE	'I_LEAVE'
 
 ##### Symbolic represenations of Y86 function codes                  #####
 intsig FNONE    'F_NONE'        # Default function code

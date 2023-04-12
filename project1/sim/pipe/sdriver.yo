@@ -43,13 +43,16 @@
   0x048: 6222         | 	andl %edx,%edx		# len <= 0?
   0x04a: 7183000000   | 	jle Done		# if so, goto Done:
                       | 
-  0x04f: 506300000000 | Loop:	mrmovl (%ebx), %esi	# read val from src...
+  0x04f:              | Loop:	
+  0x04f: 506300000000 | 	mrmovl (%ebx), %esi	# read val from src...
   0x055: 406100000000 | 	rmmovl %esi, (%ecx)	# ...and store it to dst
   0x05b: 6266         | 	andl %esi, %esi		# val <= 0?
   0x05d: 716a000000   | 	jle Npos		# if so, goto Npos:
   0x062: 30f701000000 | 	irmovl $1, %edi
   0x068: 6070         | 	addl %edi, %eax		# count++
-  0x06a: 30f701000000 | Npos:	irmovl $1, %edi
+                      | 
+  0x06a:              | Npos:	
+  0x06a: 30f701000000 | 	irmovl $1, %edi
   0x070: 6172         | 	subl %edi, %edx		# len--
   0x072: 30f704000000 | 	irmovl $4, %edi
   0x078: 6073         | 	addl %edi, %ebx		# src++
@@ -78,8 +81,8 @@
   0x090:              | 	.align 4
   0x090:              | src:
   0x090: 01000000     | 	.long 1
-  0x094: 02000000     | 	.long 2
-  0x098: fdffffff     | 	.long -3
+  0x094: feffffff     | 	.long -2
+  0x098: 03000000     | 	.long 3
   0x09c: fcffffff     | 	.long -4
   0x0a0: fadebc00     | 	.long 0xbcdefa # This shouldn't get moved
                       | 
