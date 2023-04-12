@@ -1,0 +1,39 @@
+                      | # Xiaohan Qin 521021910604
+  0x000:              |     .pos 0
+  0x000: 30f400040000 |     irmovl stack, %esp
+  0x006: 8024000000   |     call main
+  0x00b: 00           |     halt
+                      | 
+  0x00c:              |     .align 4
+  0x00c:              | ele1:
+  0x00c: 0a000000     |     .long 0x00a
+  0x010: 14000000     |     .long ele2
+  0x014:              | ele2:
+  0x014: b0000000     |     .long 0x0b0
+  0x018: 1c000000     |     .long ele3
+  0x01c:              | ele3:
+  0x01c: 000c0000     |     .long 0xc00
+  0x020: 00000000     |     .long 0
+                      | 
+  0x024:              | main:
+  0x024: 30f60c000000 |     irmovl ele1, %esi
+  0x02a: 8030000000   |     call sum
+  0x02f: 90           |     ret
+                      | 
+  0x030:              | sum:
+  0x030: 6300         |     xorl %eax, %eax      # sum = 0
+  0x032: 704a000000   |     jmp test
+                      | 
+  0x037:              | loop:
+  0x037: 502600000000 |     mrmovl (%esi), %edx 
+  0x03d: 6020         |     addl %edx, %eax      # sum += *esi
+  0x03f: 506604000000 |     mrmovl 4(%esi), %esi
+  0x045: 704a000000   |     jmp test
+                      | 
+  0x04a:              | test:
+  0x04a: 6266         |     andl %esi, %esi      # test if esi == 0
+  0x04c: 7437000000   |     jne loop
+  0x051: 90           |     ret
+                      | 
+  0x400:              |     .pos 0x400
+  0x400:              | stack:

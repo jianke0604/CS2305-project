@@ -1,0 +1,39 @@
+# Xiaohan Qin 521021910604
+    .pos 0
+    irmovl stack, %esp
+    call main
+    halt
+
+    .align 4
+ele1:
+    .long 0x00a
+    .long ele2
+ele2:
+    .long 0x0b0
+    .long ele3
+ele3:
+    .long 0xc00
+    .long 0
+
+main:
+    irmovl ele1, %esi
+    call sum
+    ret
+
+sum:
+    xorl %eax, %eax      # sum = 0
+    jmp test
+
+loop:
+    mrmovl (%esi), %edx 
+    addl %edx, %eax      # sum += *esi
+    mrmovl 4(%esi), %esi
+    jmp test
+
+test:
+    andl %esi, %esi      # test if esi == 0
+    jne loop
+    ret
+
+    .pos 0x400
+stack:
