@@ -1,3 +1,5 @@
+# Xiaohan Qin 521021910604
+
 #/* $begin seq-all-hcl */
 ####################################################################
 #  HCL Description of Control for Single Cycle Y86 Processor SEQ   #
@@ -40,6 +42,7 @@ intsig IPUSHL	'I_PUSHL'
 intsig IPOPL	'I_POPL'
 # Instruction code for iaddl instruction
 intsig IIADDL	'I_IADDL'
+// inssig ILEAVE	'I_LEAVE'
 
 ##### Symbolic represenations of Y86 function codes                  #####
 intsig FNONE    'F_NONE'        # Default function code
@@ -107,16 +110,16 @@ int ifun = [
 
 bool instr_valid = icode in 
 	{ INOP, IHALT, IRRMOVL, IIRMOVL, IRMMOVL, IMRMOVL,
-	       IOPL, IJXX, ICALL, IRET, IPUSHL, IPOPL };
+	       IOPL, IJXX, ICALL, IRET, IPUSHL, IPOPL, IIADDL, ILEAVE };
 
 # Does fetched instruction require a regid byte?
 bool need_regids =
 	icode in { IRRMOVL, IOPL, IPUSHL, IPOPL, 
-		     IIRMOVL, IRMMOVL, IMRMOVL };
+		     IIRMOVL, IRMMOVL, IMRMOVL, IIADDL };
 
 # Does fetched instruction require a constant word?
 bool need_valC =
-	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IJXX, ICALL };
+	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IJXX, ICALL, IIADDL };
 
 ################ Decode Stage    ###################################
 
@@ -124,12 +127,13 @@ bool need_valC =
 int srcA = [
 	icode in { IRRMOVL, IRMMOVL, IOPL, IPUSHL  } : rA;
 	icode in { IPOPL, IRET } : RESP;
+	icode in { ILEAVE } : REBP;
 	1 : RNONE; # Don't need register
 ];
 
 ## What register should be used as the B source?
 int srcB = [
-	icode in { IOPL, IRMMOVL, IMRMOVL  } : rB;
+	icode in { IOPL, IRMMOVL, IMRMOVL, IIADDL  } : rB;
 	icode in { IPUSHL, IPOPL, ICALL, IRET } : RESP;
 	1 : RNONE;  # Don't need register
 ];
@@ -137,14 +141,15 @@ int srcB = [
 ## What register should be used as the E destination?
 int dstE = [
 	icode in { IRRMOVL } && Cnd : rB;
-	icode in { IIRMOVL, IOPL} : rB;
-	icode in { IPUSHL, IPOPL, ICALL, IRET } : RESP;
+	icode in { IIRMOVL, IOPL, IIADDL } : rB;
+	icode in { IPUSHL, IPOPL, ICALL, IRET, ILEAVE } : RESP;
 	1 : RNONE;  # Don't write any register
 ];
 
 ## What register should be used as the M destination?
 int dstM = [
 	icode in { IMRMOVL, IPOPL } : rA;
+	icode in { ILEAVE } : REBP;
 	1 : RNONE;  # Don't write any register
 ];
 
@@ -153,17 +158,18 @@ int dstM = [
 ## Select input A to ALU
 int aluA = [
 	icode in { IRRMOVL, IOPL } : valA;
-	icode in { IIRMOVL, IRMMOVL, IMRMOVL } : valC;
+	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IIADDL } : valC;
 	icode in { ICALL, IPUSHL } : -4;
-	icode in { IRET, IPOPL } : 4;
+	icode in { IRET, IPOPL, ILEAVE } : 4;
 	# Other instructions don't need ALU
 ];
 
 ## Select input B to ALU
 int aluB = [
 	icode in { IRMMOVL, IMRMOVL, IOPL, ICALL, 
-		      IPUSHL, IRET, IPOPL } : valB;
+		      IPUSHL, IRET, IPOPL, IIADDL } : valB;
 	icode in { IRRMOVL, IIRMOVL } : 0;
+	icode in { ILEAVE } : valA;
 	# Other instructions don't need ALU
 ];
 
@@ -174,12 +180,12 @@ int alufun = [
 ];
 
 ## Should the condition codes be updated?
-bool set_cc = icode in { IOPL };
+bool set_cc = icode in { IOPL, IIADDL };
 
 ################ Memory Stage    ###################################
 
 ## Set read control signal
-bool mem_read = icode in { IMRMOVL, IPOPL, IRET };
+bool mem_read = icode in { IMRMOVL, IPOPL, IRET, ILEAVE };
 
 ## Set write control signal
 bool mem_write = icode in { IRMMOVL, IPUSHL, ICALL };
@@ -187,7 +193,7 @@ bool mem_write = icode in { IRMMOVL, IPUSHL, ICALL };
 ## Select memory address
 int mem_addr = [
 	icode in { IRMMOVL, IPUSHL, ICALL, IMRMOVL } : valE;
-	icode in { IPOPL, IRET } : valA;
+	icode in { IPOPL, IRET, ILEAVE } : valA;
 	# Other instructions don't need address
 ];
 
