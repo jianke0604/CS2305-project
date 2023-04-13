@@ -133,20 +133,13 @@ intsig W_valM  'mem_wb_curr->valm'	# Memory M value
 ####################################################################
 #    Control Signal Definitions.                                   #
 ####################################################################
-intsig JMP 'C_YES'
-# ALU in EX, use forwardding to get cc
-boolsig f_take 'cond_holds(compute_cc(id_ex_curr->ifun, gen_aluA(), gen_aluB()), gen_f_ifun())'
-boolsig f_alucc 'cond_holds(cc, gen_f_ifun())'
+
 ################ Fetch Stage     ###################################
 
 ## What address should instruction be fetched at
 int f_pc = [
-	# Unconditional jump. Fetch at target address
-	M_icode == IJXX && M_ifun == JMP : F_predPC;
-
 	# Mispredicted branch.  Fetch at incremented PC
-	M_icode == IJXX && (W_icode in {IOPL, IIADDL}) && !M_Cnd : M_valA;
-	
+	M_icode == IJXX && !M_Cnd : M_valA;
 	# Completion of RET instruction.
 	W_icode == IRET : W_valM;
 	# Default: Use predicted value of PC
@@ -189,23 +182,7 @@ bool need_valC =
 
 # Predict next value of PC
 int f_predPC = [
-	f_icode == ICALL : f_valC;
-
-	# Unconditional jump.  Predict target address
-	f_icode == IJXX && f_ifun == JMP : f_valC;
-
-	# Important! if EX an DE are both ALU, we should use D's cc, missing this will cause a bug
-	f_icode == IJXX && (D_icode in {IOPL, IIADDL}): f_valC;
-
-	# Conditional jump and ALU in EX, use forwarding to get cc
-	f_icode == IJXX && (E_icode in {IOPL, IIADDL}) && !f_take : f_valP;
-
-	# ALU is not in EX, get cc directly from ALU
-	f_icode == IJXX && !(E_icode in {IOPL, IIADDL}) && !f_alucc: f_valP;
-
-	# Other JXX, default take
-	f_icode == IJXX : f_valC;
-
+	f_icode in { IJXX, ICALL } : f_valC;
 	1 : f_valP;
 ];
 
@@ -361,7 +338,7 @@ bool D_stall =
 
 bool D_bubble =
 	# Mispredicted branch
-	(E_icode == IJXX && E_ifun != JMP && (M_icode in {IOPL, IIADDL}) && !e_Cnd) ||
+	(E_icode == IJXX && !e_Cnd) ||
 	# Stalling at fetch while ret passes through pipeline
 	# but not condition for a load/use hazard
 	!(E_icode in { IMRMOVL, IPOPL } && E_dstM in { d_srcA, d_srcB }) &&
@@ -372,7 +349,7 @@ bool D_bubble =
 bool E_stall = 0;
 bool E_bubble =
 	# Mispredicted branch
-	(E_icode == IJXX && E_ifun != JMP && (M_icode in {IOPL, IIADDL}) && !e_Cnd) ||
+	(E_icode == IJXX && !e_Cnd) ||
 	# Conditions for a load/use hazard
 	E_icode in { IMRMOVL, IPOPL } &&
 	 E_dstM in { d_srcA, d_srcB};

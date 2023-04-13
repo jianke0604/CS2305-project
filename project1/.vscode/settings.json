@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "sim.h": "c",
+        "isa.h": "c",
+        "pipeline.h": "c",
+        "stages.h": "c"
+    }
+}

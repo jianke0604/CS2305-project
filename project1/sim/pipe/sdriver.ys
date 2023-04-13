@@ -39,26 +39,186 @@ ncopy:	pushl %ebp		# Save old frame pointer
 ##################################################################
 # You can modify this portion
 	# Loop header
-	xorl %eax,%eax		# count = 0;
-	andl %edx,%edx		# len <= 0?
-	jle Done		# if so, goto Done:
+	iaddl -6, %edx      # len = len - 6
+	irmovl $0, %eax     # count = 0
+	jl rest		        # if so, goto rest:
 
-Loop:	
+Loop0:	
+	mrmovl (%ebx), %esi	     # src[0]
+    mrmovl 4(%ebx), %edi	 # src[1]
+	andl %esi, %esi		 # if src[0] <= 0, jump to loop1
+	rmmovl %esi, (%ecx)	 # dst[0] = src[0]
+	jle loop1		
+	iaddl $1, %eax		 # else count++
+
+loop1:
+    mrmovl 8(%ebx), %esi	 # src[2]
+	andl %edi, %edi		 # if src[1] <= 0, jump to loop2
+    rmmovl %edi, 4(%ecx)	 # dst[1] = src[1]
+    jle loop2		
+    iaddl $1, %eax		 # else count++
+
+loop2:
+    mrmovl 12(%ebx), %edi	 # src[3]
+	andl %esi, %esi		 # if src[2] <= 0, jump to loop3
+    rmmovl %esi, 8(%ecx)	 # dst[2] = src[2]
+    jle loop3		
+    iaddl $1, %eax		 # else count++
+
+loop3:
+    mrmovl 16(%ebx), %esi	 # src[4]
+	andl %edi, %edi		 # if src[3] <= 0, jump to loop4
+    rmmovl %edi, 12(%ecx)	 # dst[3] = src[3]
+    jle loop4		
+    iaddl $1, %eax		 # else count++
+
+loop4:
+    mrmovl 20(%ebx), %edi	 # src[5]
+	andl %esi, %esi		 # if src[4] <= 0, jump to loop5
+    rmmovl %esi, 16(%ecx)	 # dst[4] = src[4]
+    jle loop5		
+    iaddl $1, %eax		 # else count++
+
+loop5:
+    # mrmovl 24(%ebx), %esi	 # src[6]
+	andl %edi, %edi		 # if src[5] <= 0, jump to update
+    rmmovl %edi, 20(%ecx)	 # dst[5] = src[5]
+    jle update	
+    iaddl $1, %eax		 # else count++
+
+update:
+    iaddl $24, %ebx		# src += 6
+    iaddl $24, %ecx		# dst += 6
+    iaddl $-6, %edx		# len -= 6
+    jge Loop0			# if so, goto Loop0, else goto rest
+
+# Now we have len <= 6, then we can build a binary search tree to find len
+# notice that %edx = len - 6, it can be {-6, -5, -4, -3, -2, -1, 0}
+# when len%6=0, have bug?
+# bug fixed! Just modifie jg to jge and jle to jl
+
+rest:
+    iaddl $3, %edx		# len += 3 {-3, -2, -1, 0, 1, 2, 3}
+    jl searchleft       #{-3, -2, -1}
+    je resloop3_1      # len = 3
+    iaddl -1, %edx	
+    mrmovl (%ebx), %esi	    # read val from src...
+    je resloop4_1      # len = 4
+    jmp resloop5_1     # len = 5
+
+searchleft:
+    iaddl $2, %edx		# len += 2 {-1, 0, 1}
 	mrmovl (%ebx), %esi	# read val from src...
-	rmmovl %esi, (%ecx)	# ...and store it to dst
-	andl %esi, %esi		# val <= 0?
-	jle Npos		# if so, goto Npos:
-	irmovl $1, %edi
-	addl %edi, %eax		# count++
+    jl Done
+    je resloop1_1      # len = 1
+    jmp resloop2_1     # len = 2
 
-Npos:	
-	irmovl $1, %edi
-	subl %edi, %edx		# len--
-	irmovl $4, %edi
-	addl %edi, %ebx		# src++
-	addl %edi, %ecx		# dst++
-	andl %edx,%edx		# len > 0?
-	jg Loop			# if so, goto Loop:
+resloop1_1:
+	andl %esi, %esi		# val <= 0?
+    rmmovl %esi, (%ecx)	# ...and store it to dst
+    jle Done		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+    jmp Done
+
+resloop2_1:
+    mrmovl 4(%ebx), %edi	# read val from src...
+	andl %esi, %esi		# val <= 0?
+    rmmovl %esi, (%ecx)	# ...and store it to dst
+    jle resloop2_2		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop2_2:
+	andl %edi, %edi		# val <= 0?
+    rmmovl %edi, 4(%ecx)	# ...and store it to dst
+    jle Done		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+    jmp Done
+
+resloop3_1:
+    mrmovl (%ebx), %esi	    # read val from src...
+    mrmovl 4(%ebx), %edi	# read val from src...
+	andl %esi, %esi		# val <= 0?
+    rmmovl %esi, (%ecx)	# ...and store it to dst
+    jle resloop3_2		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop3_2:
+    rmmovl %edi, 4(%ecx)	# store it to dst
+	andl %edi, %edi		# val <= 0?
+    mrmovl 8(%ebx), %esi	# read val from src...
+    jle resloop3_3		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop3_3:
+	andl %esi, %esi		# val <= 0?
+    rmmovl %esi, 8(%ecx)	# ...and store it to dst
+    jle Done		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+    jmp Done
+
+resloop4_1:
+
+    mrmovl 4(%ebx), %edi	# read val from src...
+	andl %esi, %esi		# val <= 0?
+    rmmovl %esi, (%ecx)	# ...and store it to dst
+    jle resloop4_2		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop4_2:
+    rmmovl %edi, 4(%ecx)	# ...and store it to dst
+	andl %edi, %edi		# val <= 0?
+    mrmovl 8(%ebx), %esi	# read val from src...
+    jle resloop4_3		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop4_3:
+    rmmovl %esi, 8(%ecx)	# ...and store it to dst
+	andl %esi, %esi		# val <= 0?
+    mrmovl 12(%ebx), %edi	# read val from src...
+    jle resloop4_4		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop4_4:
+	andl %edi, %edi		# val <= 0?
+    rmmovl %edi, 12(%ecx)	# ...and store it to dst
+    jle Done		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+    jmp Done
+
+resloop5_1:
+    # mrmovl (%ebx), %esi	    # read val from src...
+    mrmovl 4(%ebx), %edi	# read val from src...
+	andl %esi, %esi		# val <= 0?
+    rmmovl %esi, (%ecx)	# ...and store it to dst
+    jle resloop5_2		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop5_2:
+    rmmovl %edi, 4(%ecx)	# ...and store it to dst
+	andl %edi, %edi		# val <= 0?
+    mrmovl 8(%ebx), %esi	# read val from src...
+    jle resloop5_3		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop5_3:
+    rmmovl %esi, 8(%ecx)	# ...and store it to dst
+	andl %esi, %esi		# val <= 0?
+    mrmovl 12(%ebx), %edi	# read val from src...
+    jle resloop5_4		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop5_4:
+    rmmovl %edi, 12(%ecx)	# ...and store it to dst
+	andl %edi, %edi		# val <= 0?
+    mrmovl 16(%ebx), %esi	# read val from src...
+    jle resloop5_5		# if so, goto Npos:
+    iaddl $1, %eax		# count++
+
+resloop5_5:
+	andl %esi, %esi		# val <= 0?
+    rmmovl %esi, 16(%ecx)	# ...and store it to dst
+    jle Done		# if so, goto Npos:
+    iaddl $1, %eax		# count++
 ##################################################################
 # Do not modify the following section of code
 # Function epilogue.
@@ -82,8 +242,8 @@ EndFun:
 src:
 	.long 1
 	.long -2
-	.long 3
-	.long -4
+	.long -3
+	.long 4
 	.long 0xbcdefa # This shouldn't get moved
 
 	.align 16
