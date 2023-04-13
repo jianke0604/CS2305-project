@@ -23,60 +23,73 @@ ncopy:	pushl %ebp		# Save old frame pointer
 # You can modify this portion
 	# Loop header
 	xorl %eax,%eax		# count = 0;
-	iaddl -6, %edx      # len = len - 12
+	iaddl -8, %edx      # len = len - 8
 	jle rest		# if so, goto rest:
 
 Loop0:	
-	mrmovl (%ebx), %esi	     # src[0]
-    mrmovl 4(%ebx), %edi	 # src[1]
+	mrmovl (%ebx), %esi	 # src[0]
 	rmmovl %esi, (%ecx)	 # dst[0] = src[0]
 	andl %esi, %esi		 # if src[0] <= 0, jump to loop1
 	jle loop1		
 	iaddl $1, %eax		 # else count++
 
 loop1:
-    mrmovl 8(%ebx), %esi	 # src[2]
-    rmmovl %edi, 4(%ecx)	 # dst[1] = src[1]
-    andl %edi, %edi		 # if src[1] <= 0, jump to loop2
+    mrmovl 4(%ebx), %esi	 # src[1]
+    rmmovl %esi, 4(%ecx)	 # dst[1] = src[1]
+    andl %esi, %esi		 # if src[1] <= 0, jump to loop2
     jle loop2		
     iaddl $1, %eax		 # else count++
 
 loop2:
-    mrmovl 12(%ebx), %edi	 # src[3]
+    mrmovl 8(%ebx), %esi	 # src[2]
     rmmovl %esi, 8(%ecx)	 # dst[2] = src[2]
     andl %esi, %esi		 # if src[2] <= 0, jump to loop3
     jle loop3		
     iaddl $1, %eax		 # else count++
 
 loop3:
-    mrmovl 16(%ebx), %esi	 # src[4]
-    rmmovl %edi, 12(%ecx)	 # dst[3] = src[3]
-    andl %edi, %edi		 # if src[3] <= 0, jump to loop4
+    mrmovl 12(%ebx), %esi	 # src[3]
+    rmmovl %esi, 12(%ecx)	 # dst[3] = src[3]
+    andl %esi, %esi		 # if src[3] <= 0, jump to loop4
     jle loop4		
     iaddl $1, %eax		 # else count++
 
 loop4:
-    mrmovl 20(%ebx), %edi	 # src[5]
+    mrmovl 16(%ebx), %esi	 # src[4]
     rmmovl %esi, 16(%ecx)	 # dst[4] = src[4]
     andl %esi, %esi		 # if src[4] <= 0, jump to loop5
     jle loop5		
     iaddl $1, %eax		 # else count++
 
 loop5:
-    # mrmovl 24(%ebx), %esi	 # src[6]
-    rmmovl %edi, 20(%ecx)	 # dst[5] = src[5]
-    andl %edi, %edi		 # if src[5] <= 0, jump to loop6
-    jle update	
+    mrmovl 20(%ebx), %esi	 # src[5]
+    rmmovl %esi, 20(%ecx)	 # dst[5] = src[5]
+    andl %esi, %esi		 # if src[5] <= 0, jump to loop6
+    jle loop6		
+    iaddl $1, %eax		 # else count++
+
+loop6:
+    mrmovl 24(%ebx), %esi	 # src[6]
+    rmmovl %esi, 24(%ecx)	 # dst[6] = src[6]
+    andl %esi, %esi		 # if src[6] <= 0, jump to loop7
+    jle loop7		
+    iaddl $1, %eax		 # else count++
+
+loop7:
+    mrmovl 28(%ebx), %esi	 # src[7]
+    rmmovl %esi, 28(%ecx)	 # dst[7] = src[7]
+    andl %esi, %esi		 # if src[7] <= 0, jump to loop8
+    jle update		
     iaddl $1, %eax		 # else count++
 
 update:
-    iaddl $24, %ebx		# src += 6
-    iaddl $24, %ecx		# dst += 6
-    iaddl $-6, %edx		# len -= 6
+    iaddl $32, %ebx		# src += 8
+    iaddl $32, %ecx		# dst += 8
+    iaddl $-8, %edx		# len -= 8
     jg Loop0			# if so, goto Loop0, else goto rest
 
 rest:
-    iaddl $6, %edx		# len += 6
+    iaddl $8, %edx		# len += 8
     jle Done			# if so, goto Done, else goto Loop
 
 resloop:
