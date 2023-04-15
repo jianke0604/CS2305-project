@@ -25,9 +25,10 @@ ncopy:	pushl %ebp		# Save old frame pointer
 	iaddl -8, %edx      # len = len - 8
 	irmovl $0, %eax     # count = 0
 	jl rest		        # if so, goto rest:
+    mrmovl (%ebx), %esi	     # src[0]
 
 loop0:	
-	mrmovl (%ebx), %esi	     # src[0]
+	# mrmovl (%ebx), %esi	     # src[0]
     mrmovl 4(%ebx), %edi	 # src[1]
 	andl %esi, %esi		 # if src[0] <= 0, jump to loop1
 	rmmovl %esi, (%ecx)	 # dst[0] = src[0]
@@ -86,6 +87,7 @@ update:
     iaddl $32, %ebx		# src += 8
     iaddl $32, %ecx		# dst += 8
     iaddl $-8, %edx		# len -= 8
+    mrmovl (%ebx), %esi	     # src[0]
     jge loop0			# if so, goto Loop0, else goto rest
 
 # Now we have len < 8, then we can build a binary search tree to find len
@@ -102,12 +104,15 @@ rest:
 
 searchleft:
     iaddl $2, %edx		# len += 2 { -1, 0, 1}
+    mrmovl (%ebx), %esi	# read val from src...
     jl Done
     je resloop1_1      # len = 1
     jmp resloop2_1     # len = 2
 
 searchright:
     iaddl $-2, %edx		# len -= 1 
+    mrmovl 4(%ebx), %edi	# read val from src...
+    # mrmovl (%ebx), %esi	# read val from src...
     jl resloop4_1 
     je resloop5_1      # len = 5
     jmp resloop6_1     # len = 6 or 7
@@ -134,7 +139,7 @@ resloop2_2:
     jmp Done
 
 resloop3_1:
-    mrmovl (%ebx), %esi	    # read val from src...
+    # mrmovl (%ebx), %esi	    # read val from src...
     mrmovl 4(%ebx), %edi	# read val from src...
 	andl %esi, %esi		# val <= 0?
     rmmovl %esi, (%ecx)	# ...and store it to dst
@@ -156,8 +161,7 @@ resloop3_3:
     jmp Done
 
 resloop4_1:
-
-    mrmovl 4(%ebx), %edi	# read val from src...
+    # mrmovl 4(%ebx), %edi	# read val from src...
 	andl %esi, %esi		# val <= 0?
     rmmovl %esi, (%ecx)	# ...and store it to dst
     jle resloop4_2		# if so, goto Npos:
@@ -186,7 +190,7 @@ resloop4_4:
 
 resloop5_1:
     # mrmovl (%ebx), %esi	    # read val from src...
-    mrmovl 4(%ebx), %edi	# read val from src...
+    # mrmovl 4(%ebx), %edi	# read val from src...
 	andl %esi, %esi		# val <= 0?
     rmmovl %esi, (%ecx)	# ...and store it to dst
     jle resloop5_2		# if so, goto Npos:
@@ -218,9 +222,10 @@ resloop5_5:
     rmmovl %esi, 16(%ecx)	# ...and store it to dst
     jle Done		# if so, goto Npos:
     iaddl $1, %eax		# count++
+    jmp Done
 
 resloop6_1:
-    mrmovl 4(%ebx), %edi	# read val from src...
+    # mrmovl 4(%ebx), %edi	# read val from src...
     andl %esi, %esi		# val <= 0?
     rmmovl %esi, (%ecx)	# ...and store it to dst
     jle resloop6_2		# if so, goto Npos:
@@ -262,10 +267,11 @@ resloop6_6:
 
 test:
     iaddl $-1, %edx		# len -= 2
+    mrmovl 24(%ebx), %esi	# read val from src...
     je Done			    # if len == 6, goto Done
 
 resloop7:
-    mrmovl 24(%ebx), %esi	# read val from src...
+    # mrmovl 24(%ebx), %esi	# read val from src...
     andl %esi, %esi		# val <= 0?
     rmmovl %esi, 24(%ecx)	# ...and store it to dst
     jle  Done		# if so, goto Npos:
