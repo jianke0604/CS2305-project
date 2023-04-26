@@ -1,5 +1,5 @@
 # Xiaohan Qin 521021910604
-
+# Leqi Hu
 #/* $begin seq-all-hcl */
 ####################################################################
 #  HCL Description of Control for Single Cycle Y86 Processor SEQ   #

@@ -1,4 +1,5 @@
 # Xiaozhi Zhu
+# Xiaohan Qin
     .pos 0
 init:   
     irmovl stack, %esp      # set stack pointer

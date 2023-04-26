@@ -1,44 +1,43 @@
-# Xiaohan Qin 521021910604
+# Xiaozhi Zhu
     .pos 0
+init:
     irmovl stack, %esp
-    call main
-    halt
+	call main
+	halt
 
-    .align 4
-# source block
+    .align 4s
 src:
     .long 0x00a
     .long 0x0b0
     .long 0xc00
-
-# destination block
 dest:
     .long 0x111
     .long 0x222
     .long 0x333
 
+
 main:
-    irmovl src, %esi    # load src address to %esi
-    irmovl dest, %ebx   # load dest address to %ebx
-    irmovl $3, %ecx     # len
-    xorl %eax, %eax     # %eax = 0, initial result(return value)
-    call test           # do the test first
-    ret
+	irmovl src , %edi # src
+    irmovl dest , %esi # dest
+    irmovl $3 , %edx # len
+	call copy
+	ret
 
-memcpy:
-    mrmovl (%esi), %edx # load *src(val) to %edx
-    rmmovl %edx, (%ebx) # copy
-    xorl %edx, %eax     # result ^= val
-    irmovl $4, %edx
-    addl %edx, %esi
-    addl %edx, %ebx
-    irmovl $1, %edx
-    subl %edx, %ecx     # len--
-    call test
-
-test:
-    andl %ecx, %ecx     # test if len is 0
-    jne memcpy
+copy:
+    xorl    %eax , %eax # store the result
+loop:
+    andl    %edx , %edx # if %edx == 0, jump to end
+    jle     end
+    mrmovl  (%edi) , %ecx # value = *src
+    irmovl  $4 , %ebx 
+    addl    %ebx , %edi # src++
+    rmmovl  %ecx , (%esi) # *dest = value
+    addl    %ebx , %esi # dest++
+    xorl    %ecx , %eax # result ^= value
+    irmovl  $1 , %ebx 
+    subl    %ebx , %edx # len--
+    jmp     loop 
+end:
     ret
 
     .pos 0x400
