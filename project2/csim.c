@@ -19,11 +19,11 @@ typedef struct
     int valid;
     int tag;
     int stamp;
-} cache_line, *cache_asso, **cache;
+} cache_line, *cache_asso, **cache;     //the structure of cache
 
 cache cache_sim = NULL;
 
-void printUsage()
+void printUsage()                       //print the usage of the program
 {
     printf("Usage: ./csim [-hv] -s <num> -E <num> -b <num> -t <file>\n");
     printf("Options:\n");
@@ -48,7 +48,7 @@ void init_cache()
         for (int j = 0; j < E; j++)
         {
             cache_sim[i][j].valid = 0;
-            cache_sim[i][j].tag = -1;
+            cache_sim[i][j].tag = -1;               //initialize the cache
             cache_sim[i][j].stamp = -1;
         }
     }
@@ -56,8 +56,8 @@ void init_cache()
 
 void update(unsigned int address)
 {
-    int setindex_add = (address >> b) & ((1 << s) - 1);
-	int tag_add = address >> (b + s);
+    int setindex_add = (address >> b) & ((1 << s) - 1);         //get the set index
+	int tag_add = address >> (b + s);                           //get the tag
 	
 	int max_stamp = -1;
 	int max_stamp_index = -1;
@@ -68,10 +68,10 @@ void update(unsigned int address)
 		{
 			cache_sim[setindex_add][i].stamp = 0;
 			++hits;
-			return ;
+			return ;                                            //if hit, then return
 		}
 	}
-	
+                                                                //if not hit, then check if there is an empty line
 	for(int i = 0; i < E; ++i) 
 	{
 		if(cache_sim[setindex_add][i].valid == 0)
@@ -82,7 +82,7 @@ void update(unsigned int address)
 			++misses;
 			return ;
 		}
-	}
+	}                                                           //if not hit and no empty line, then evict
 	++evictions;
 	++misses;
 	
@@ -99,7 +99,7 @@ void update(unsigned int address)
 	return ;
 }
 
-void update_stamp()
+void update_stamp()                                             //update the stamp
 {
 	for(int i = 0; i < S; ++i)
 		for(int j = 0; j < E; ++j)
@@ -118,8 +118,8 @@ void parse_trace()
 	
 	char operation;      
 	unsigned int address;   
-	int size;              
-	while(fscanf(fp, " %c %xu,%d\n", &operation, &address, &size) > 0)
+	int size;               
+	while(fscanf(fp, " %c %xu,%d\n", &operation, &address, &size) > 0)  //read the trace file
 	{
 		
 		switch(operation)
@@ -127,8 +127,8 @@ void parse_trace()
 			case 'L':
 				update(address);
 				break;
-			case 'M':
-				update(address);  
+			case 'M':                                               //if it is M, then update twice
+				update(address);    
 			case 'S':
 				update(address);
 		}
@@ -136,7 +136,7 @@ void parse_trace()
 	}
 	
 	fclose(fp);
-	for(int i = 0; i < S; ++i)
+	for(int i = 0; i < S; ++i)                                      //free the cache
 		free(cache_sim[i]);
 	free(cache_sim);            
 	

@@ -30,7 +30,7 @@ static int min(int x, int y)
     return x > y ? y : x;
 }
 
-void trans_32x32(int M, int N, int A[N][M], int B[M][N])
+void trans_32x32(int M, int N, int A[N][M], int B[M][N])            //transpose function for 32x32 matrix
 {
     // version 1:287 misses
     // if (M == 32)
@@ -61,182 +61,38 @@ void trans_32x32(int M, int N, int A[N][M], int B[M][N])
     //         }
     //     }
     // }
-    int i, j, k, l, v1, v2, v3, v4, v5, v6, v7, v8;
+    int i, j, k, l, v1, v2, v3, v4, v5, v6, v7, v8;             //use 8 variables to store the values
     for (i = 0; i < N; i += 8)
     {
         for (j = 0; j < M; j += 8)
         {
-            if (i == j)
+            for (int k=i, l=j; k<i+8; k++, l++)
             {
-                k = i;
-                v1 = A[k][j];v2 = A[k][j + 1];
-                v3 = A[k][j + 2];
-                v4 = A[k][j + 3];
-                v5 = A[k][j + 4];
-                v6 = A[k][j + 5];
-                v7 = A[k][j + 6];
-                v8 = A[k][j + 7];
-                B[k][j] = v1;
-                B[k][j + 1] = v2;
-                B[k][j + 2] = v3;
-                B[k][j + 3] = v4;
-                B[k][j + 4] = v5;
-                B[k][j + 5] = v6;
-                B[k][j + 6] = v7;
-                B[k][j + 7] = v8;
-
-                v1 = A[k+1][j];
-                v2 = A[k+1][j + 1];
-                v3 = A[k+1][j + 2];
-                v4 = A[k+1][j + 3];
-                v5 = A[k+1][j + 4];
-                v6 = A[k+1][j + 5];
-                v7 = A[k+1][j + 6];
-                v8 = A[k+1][j + 7];
-                B[k+1][j] = B[k][j+1];
-                B[k][j + 1] = v1;
-                B[k+1][j + 1] = v2;
-                B[k+1][j + 2] = v3;
-                B[k+1][j + 3] = v4;
-                B[k+1][j + 4] = v5;
-                B[k+1][j + 5] = v6;
-                B[k+1][j + 6] = v7;
-                B[k+1][j + 7] = v8;
-
-                v1 = A[k+2][j];
-                v2 = A[k+2][j + 1];
-                v3 = A[k+2][j + 2];
-                v4 = A[k+2][j + 3];
-                v5 = A[k+2][j + 4];
-                v6 = A[k+2][j + 5];
-                v7 = A[k+2][j + 6];
-                v8 = A[k+2][j + 7];
-                B[k+2][j] = B[k][j+2];
-                B[k+2][j+1] = B[k+1][j+2];
-                B[k][j + 2] = v1;
-                B[k+1][j + 2] = v2;
-                B[k+2][j + 2] = v3;
-                B[k+2][j + 3] = v4;
-                B[k+2][j + 4] = v5;
-                B[k+2][j + 5] = v6;
-                B[k+2][j + 6] = v7;
-                B[k+2][j + 7] = v8;
-
-                v1 = A[k+3][j];
-                v2 = A[k+3][j + 1];
-                v3 = A[k+3][j + 2];
-                v4 = A[k+3][j + 3];
-                v5 = A[k+3][j + 4];
-                v6 = A[k+3][j + 5];
-                v7 = A[k+3][j + 6];
-                v8 = A[k+3][j + 7];
-                B[k+3][j] = B[k][j+3];
-                B[k+3][j+1] = B[k+1][j+3];
-                B[k+3][j+2] = B[k+2][j+3];
-                B[k][j + 3] = v1;
-                B[k+1][j + 3] = v2;
-                B[k+2][j + 3] = v3;
-                B[k+3][j + 3] = v4;
-                B[k+3][j + 4] = v5;
-                B[k+3][j + 5] = v6;
-                B[k+3][j + 6] = v7;
-                B[k+3][j + 7] = v8;
-
-                v1 = A[k+4][j];
-                v2 = A[k+4][j + 1];
-                v3 = A[k+4][j + 2];
-                v4 = A[k+4][j + 3];
-                v5 = A[k+4][j + 4];
-                v6 = A[k+4][j + 5];
-                v7 = A[k+4][j + 6];
-                v8 = A[k+4][j + 7];
-                B[k+4][j] = B[k][j+4];
-                B[k+4][j+1] = B[k+1][j+4];
-                B[k+4][j+2] = B[k+2][j+4];
-                B[k+4][j+3] = B[k+3][j+4];
-                B[k][j + 4] = v1;
-                B[k+1][j + 4] = v2;
-                B[k+2][j + 4] = v3;
-                B[k+3][j + 4] = v4;
-                B[k+4][j + 4] = v5;
-                B[k+4][j + 5] = v6;
-                B[k+4][j + 6] = v7;
-                B[k+4][j + 7] = v8;
-
-                v1 = A[k+5][j];
-                v2 = A[k+5][j + 1];
-                v3 = A[k+5][j + 2];
-                v4 = A[k+5][j + 3];
-                v5 = A[k+5][j + 4];
-                v6 = A[k+5][j + 5];
-                v7 = A[k+5][j + 6];
-                v8 = A[k+5][j + 7];
-                B[k+5][j] = B[k][j+5];
-                B[k+5][j+1] = B[k+1][j+5];
-                B[k+5][j+2] = B[k+2][j+5];
-                B[k+5][j+3] = B[k+3][j+5];
-                B[k+5][j+4] = B[k+4][j+5];
-                B[k][j + 5] = v1;
-                B[k+1][j + 5] = v2;
-                B[k+2][j + 5] = v3;
-                B[k+3][j + 5] = v4;
-                B[k+4][j + 5] = v5;
-                B[k+5][j + 5] = v6;
-                B[k+5][j + 6] = v7;
-                B[k+5][j + 7] = v8;
-
-                v1 = A[k+6][j];
-                v2 = A[k+6][j + 1];
-                v3 = A[k+6][j + 2];
-                v4 = A[k+6][j + 3];
-                v5 = A[k+6][j + 4];
-                v6 = A[k+6][j + 5];
-                v7 = A[k+6][j + 6];
-                v8 = A[k+6][j + 7];
-                B[k+6][j] = B[k][j+6];
-                B[k+6][j+1] = B[k+1][j+6];
-                B[k+6][j+2] = B[k+2][j+6];
-                B[k+6][j+3] = B[k+3][j+6];
-                B[k+6][j+4] = B[k+4][j+6];
-                B[k+6][j+5] = B[k+5][j+6];
-                B[k][j + 6] = v1;
-                B[k+1][j + 6] = v2;
-                B[k+2][j + 6] = v3;
-                B[k+3][j + 6] = v4;
-                B[k+4][j + 6] = v5;
-                B[k+5][j + 6] = v6;
-                B[k+6][j + 6] = v7;
-                B[k+6][j + 7] = v8;
-
-                v1 = A[k+7][j];
-                v2 = A[k+7][j + 1];
-                v3 = A[k+7][j + 2];
-                v4 = A[k+7][j + 3];
-                v5 = A[k+7][j + 4];
-                v6 = A[k+7][j + 5];
-                v7 = A[k+7][j + 6];
-                v8 = A[k+7][j + 7];
-                B[k+7][j] = B[k][j+7];
-                B[k+7][j+1] = B[k+1][j+7];
-                B[k+7][j+2] = B[k+2][j+7];
-                B[k+7][j+3] = B[k+3][j+7];
-                B[k+7][j+4] = B[k+4][j+7];
-                B[k+7][j+5] = B[k+5][j+7];
-                B[k+7][j+6] = B[k+6][j+7];
-                B[k][j + 7] = v1;
-                B[k+1][j + 7] = v2;
-                B[k+2][j + 7] = v3;
-                B[k+3][j + 7] = v4;
-                B[k+4][j + 7] = v5;
-                B[k+5][j + 7] = v6;
-                B[k+6][j + 7] = v7;
-                B[k+7][j + 7] = v8;
+                v1 = A[k][j];
+                v2 = A[k][j+1];
+                v3 = A[k][j+2];
+                v4 = A[k][j+3];
+                v5 = A[k][j+4];
+                v6 = A[k][j+5];
+                v7 = A[k][j+6];
+                v8 = A[k][j+7];
+                B[l][i] = v1;
+                B[l][i+1] = v2;
+                B[l][i+2] = v3;
+                B[l][i+3] = v4;
+                B[l][i+4] = v5;
+                B[l][i+5] = v6;
+                B[l][i+6] = v7;
+                B[l][i+7] = v8;
             }
-            else
+            for (k=0; k<8; k++)                                 //lazy transposition, copy first then transpose
             {
-                for (k=i; k<i+8; k++)
-                    for (l=j; l<j+8; l++)
-                        B[l][k] = A[k][l];
+                for (l=k+1; l<8; l++)
+                {
+                    v1 = B[j+k][i+l];
+                    B[j+k][i+l] = B[j+l][i+k];
+                    B[j+l][i+k] = v1;
+                }
             }
         }
     }
@@ -263,6 +119,7 @@ void trans_64x64(int M, int N, int A[N][M], int B[M][N])
                 v7 = A[k + i][j + 6];
                 v8 = A[k + i][j + 7];
 
+                // copy to B
                 B[j + k][i + 0] = v1;
                 B[j + k][i + 1] = v2;
                 B[j + k][i + 2] = v3;
@@ -272,43 +129,19 @@ void trans_64x64(int M, int N, int A[N][M], int B[M][N])
                 B[j + k][i + 6] = v7;
                 B[j + k][i + 7] = v8;
             }
-
-            k = 0;
-            tmp = B[j + k][i + 1], B[j + k][i + 1] = B[j + 1][i + k],
-            B[j + 1][i + k] = tmp;
-            tmp = B[j + k][i + 4 + 1],
-            B[j + k][i + 4 + 1] = B[j + 1][i + 4 + k],
-            B[j + 1][i + 4 + k] = tmp;
-            tmp = B[j + k][i + 2], B[j + k][i + 2] = B[j + 2][i + k],
-            B[j + 2][i + k] = tmp;
-            tmp = B[j + k][i + 4 + 2],
-            B[j + k][i + 4 + 2] = B[j + 2][i + 4 + k],
-            B[j + 2][i + 4 + k] = tmp;
-            tmp = B[j + k][i + 3], B[j + k][i + 3] = B[j + 3][i + k],
-            B[j + 3][i + k] = tmp;
-            tmp = B[j + k][i + 4 + 3],
-            B[j + k][i + 4 + 3] = B[j + 3][i + 4 + k],
-            B[j + 3][i + 4 + k] = tmp;
-
-            k = 1;
-            tmp = B[j + k][i + 2], B[j + k][i + 2] = B[j + 2][i + k],
-            B[j + 2][i + k] = tmp;
-            tmp = B[j + k][i + 4 + 2],
-            B[j + k][i + 4 + 2] = B[j + 2][i + 4 + k],
-            B[j + 2][i + 4 + k] = tmp;
-            tmp = B[j + k][i + 3], B[j + k][i + 3] = B[j + 3][i + k],
-            B[j + 3][i + k] = tmp;
-            tmp = B[j + k][i + 4 + 3],
-            B[j + k][i + 4 + 3] = B[j + 3][i + 4 + k],
-            B[j + 3][i + 4 + k] = tmp;
-
-            k = 2;
-            tmp = B[j + k][i + 3], B[j + k][i + 3] = B[j + 3][i + k],
-            B[j + 3][i + k] = tmp;
-            tmp = B[j + k][i + 4 + 3],
-            B[j + k][i + 4 + 3] = B[j + 3][i + 4 + k],
-            B[j + 3][i + 4 + k] = tmp;
-
+            // then transpose
+            for (k = 0; k < 4; k++) 
+            {
+                for (v1 = k + 1; v1 < 4; v1++) 
+                {
+                    tmp = B[j + k][i + v1], B[j + k][i + v1] = B[j + v1][i + k],
+                    B[j + v1][i + k] = tmp;
+                    tmp = B[j + k][i + 4 + v1],
+                    B[j + k][i + 4 + v1] = B[j + v1][i + 4 + k],
+                    B[j + v1][i + 4 + k] = tmp;
+                }
+            }
+            // A bottom left and right
             for (k = 0; k < 4; k++) 
             {
                 // step 1 2
@@ -334,11 +167,11 @@ void trans_61x67(int M, int N, int A[N][M], int B[M][N])
 {
     int i, j, k, s, v1, v2, v3, v4, v5, v6, v7, v8;
     for (i = 0; i < N; i += 8) 
-    for (j = 0; j < M; j += 1) 
-    {
-        if (i + 8 <= N && j + 1 <= M) 
-        {
-            for (s = j; s < j + 1; s++) 
+    for (j = 0; j < M; j += 1)                                  //After test, I choose 1 as the best step 1: 1758
+    {                                                           //10: 1775
+        if (i + 8 <= N && j + 1 <= M)                           //15: 1777
+        {                                                       //20: 1776
+            for (s = j; s < j + 1; s++)                         //30: 1799
             {
                 v1 = A[i][s];
                 v2 = A[i + 1][s];
